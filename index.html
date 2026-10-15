@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculateur de murs arrondis</title>
+<style>
+*{box-sizing:border-box}body{font-family:Arial,sans-serif;padding:2em;background:#f4f7fa;color:#243746;line-height:1.5}.container{max-width:540px;margin:auto;background:white;padding:2em;border-radius:1em;box-shadow:0 2px 10px #0001}h1{font-size:1.5em;text-align:center;margin:0 0 1em}label{display:block;margin-top:1em}input,select{width:100%;padding:.65em;margin-top:.3em;border:1px solid #bcc8d1;border-radius:.5em;font-size:1em;background:white;color:#243746}button{margin-top:1.3em;padding:.8em 1.2em;background:#1976d2;color:white;border:0;border-radius:.5em;font-size:1.05em;cursor:pointer;width:100%}button:hover{background:#1458a3}input:focus,select:focus,button:focus-visible{outline:3px solid #90caf9;outline-offset:2px}.instructions{background:#fff9e0;border-left:5px solid #f7b733;padding:1em;border-radius:.7em;font-size:.94em}ol{padding-left:1.3em;margin:.5em 0}.hint{color:#5c6c79;font-size:.88em;margin:.35em 0}.schema{margin-top:1.5em;background:#f9fbff;border:1px solid #dce3ea;border-radius:.5em;overflow:hidden}svg{display:block;width:100%;height:auto}.legend{font-size:.85em;padding:0 1em 1em;margin:0}.result{margin-top:1.2em;background:#e3f2fd;padding:1em;border-radius:.5em}.main{font-size:1.5em;color:#1458a3;font-weight:bold}dl{margin:.8em 0 0}dl div{display:flex;justify-content:space-between;gap:1em;margin:.4em 0}dd{margin:0;font-weight:bold;text-align:right}.error{background:#ffebee;color:#a11919}.note{font-size:.88em;color:#566774;margin:1em 0 0}.badge{font-size:.8em;color:#617587;text-align:center;margin:0 0 1.2em}@media(max-width:600px){body{padding:.4em}.container{padding:1.1em}h1{font-size:1.35em}}@media print{body{background:white;padding:0}.container{box-shadow:none}button{display:none}}
+</style>
+</head>
+<body><main class="container">
+<h1>Calculateur de murs arrondis</h1><p class="badge">Relevé technique • Rayon et longueur de l’arc</p>
+<label for="mode"><b>Forme du mur</b></label><select id="mode"><option value="direct">Mur en creux — cordeau entre A et B</option><option value="convex">Mur bombé vers moi — référence devant le mur</option></select><p class="hint">Choisissez la méthode adaptée à la face accessible.</p><section class="instructions" id="instructions"><b>Procédure :</b><ol>
+<li>Choisissez deux points <b>A et B</b> sur le mur, à la même hauteur.</li>
+<li>Tendez un cordeau entre A et B. Mesurez cette distance <b>en ligne droite</b> : c’est la <b>corde C</b>.</li>
+<li>Repérez le milieu <b>M</b> du cordeau.</li>
+<li>Mesurez du milieu M au mur, <b>perpendiculairement au cordeau</b> : c’est la <b>flèche f</b>.</li>
+</ol><b>La corde ne se mesure pas en suivant le mur.</b></section>
+<form id="form" novalidate>
+<label for="corde">Longueur de la corde AB <b>(en cm)</b></label><input id="corde" type="text" inputmode="decimal" value="200" placeholder="Ex. : 200" required><p class="hint">Distance droite entre les deux points choisis.</p>
+<div id="directFields"><label for="fleche">Flèche, du milieu M au mur <b>(en cm)</b></label><input id="fleche" type="text" inputmode="decimal" value="20" placeholder="Ex. : 20" required><p class="hint">Mesure à angle droit par rapport au cordeau.</p>
+</div><div id="convexFields" hidden><label for="extremites">Distance de la référence au mur en A et B <b>(en cm)</b></label><input id="extremites" type="text" inputmode="decimal" value="30"><p class="hint">La même distance aux deux extrémités, mesurée à angle droit.</p><label for="milieu">Distance de la référence au mur au milieu <b>(en cm)</b></label><input id="milieu" type="text" inputmode="decimal" value="10"><p class="hint">À mi-distance des deux projections. Elle doit être inférieure à celle des extrémités.</p></div><div id="orientation"><label for="sens">Orientation du dessin</label><select id="sens"><option value="1">Arrondi au-dessus du cordeau</option><option value="-1">Arrondi au-dessous du cordeau</option></select><p class="hint">L’orientation change le dessin uniquement, pas les résultats.</p>
+</div><button type="submit">Calculer le rayon</button></form>
+<section class="schema" aria-label="Schéma du mur arrondi"><svg id="schema" viewBox="0 0 500 310" role="img" aria-labelledby="schemaTitle"><title id="schemaTitle">Corde AB, milieu M et flèche jusqu’au mur</title><g id="drawing"></g></svg><p class="legend" id="legend"><span style="color:#1976d2">━ Mur arrondi</span> · <span style="color:#536779">┄ Corde AB</span> · <span style="color:#bc6512">Flèche f</span><br>Vue de dessus. Les proportions suivent les mesures ; les repères sont agrandis.</p></section>
+<div id="result" class="result" aria-live="polite"></div>
+<p class="note">Calcul valable pour un arc de cercle régulier. La longueur calculée correspond uniquement à la portion entre A et B. Pour contrôler la régularité du mur, recommencez avec une autre corde et comparez les rayons.</p>
+<details class="note"><summary>Conseils de mesure et formule</summary><p>Choisissez une corde assez longue. Une flèche très faible rend le rayon sensible aux petites erreurs de mesure. Mesurez toujours sur la même face du mur et à la même hauteur.</p><p>Rayon : R = C² / (8f) + f / 2.<br>Angle de l’arc : θ = 4 × arctan(2f / C).<br>Longueur de l’arc : L = R × θ (θ en radians).</p><p>Une flèche supérieure à la moitié de la corde décrit un arc de plus de 180°. Vérifiez qu’il correspond bien à la portion de mur relevée.</p></details>
+</main>
+<script>
+'use strict';
+function compute(c,f){if(!Number.isFinite(c)||!Number.isFinite(f)||c<=0||f<=0)throw Error('Entrez deux mesures strictement positives, en centimètres.');const r=c*c/(8*f)+f/2,theta=4*Math.atan2(2*f,c),length=r*theta;if(![r,theta,length].every(Number.isFinite))throw Error('Ces mesures sont trop grandes. Vérifiez les valeurs saisies.');return {r,theta,length};}
+const fmt=(n,d=2)=>n.toLocaleString('fr-FR',{minimumFractionDigits:d,maximumFractionDigits:d});
+function parseMeasure(s){const v=s.trim().replace(/\s/g,'').replace(',','.');return /^(?:\d+(?:\.\d*)?|\.\d+)$/.test(v)?Number(v):NaN;}
+function draw(c,f,theta,sens){
+const points=[];const ratio=f/c, rr=1/(8*ratio)+ratio/2;
+for(let i=0;i<=240;i++){const t=-theta/2+theta*i/240;points.push([rr*Math.sin(t),sens*(ratio-2*rr*Math.sin(t/2)**2)]);}
+// Force exact endpoints and midpoint to avoid cancellation on shallow arcs.
+points[0]=[-.5,0];points[120]=[0,sens*ratio];points[240]=[.5,0];
+const xs=points.map(p=>p[0]),ys=points.map(p=>p[1]);const xmin=Math.min(...xs,-.5),xmax=Math.max(...xs,.5),ymin=Math.min(...ys,0),ymax=Math.max(...ys,0);const scale=Math.min(390/(xmax-xmin),175/Math.max(ymax-ymin,.000001));
+const ox=250-(xmin+xmax)/2*scale,oy=145+(ymin+ymax)/2*scale;const xy=(x,y)=>[ox+x*scale,oy-y*scale];const a=xy(-.5,0),b=xy(.5,0),m=xy(0,0),p=xy(0,sens*ratio);const path=points.map((v,i)=>(i?'L':'M')+xy(...v).join(',')).join(' ');
+const line=(q,z,color,dash='')=>'<line x1="'+q[0]+'" y1="'+q[1]+'" x2="'+z[0]+'" y2="'+z[1]+'" stroke="'+color+'" stroke-width="2" '+(dash?'stroke-dasharray="'+dash+'"':'')+'/>';
+const label=(q,text,dx,dy,color='#243746')=>'<text x="'+(q[0]+dx)+'" y="'+(q[1]+dy)+'" fill="'+color+'" font-family="Arial" font-size="15" text-anchor="middle">'+text+'</text>';
+let out='<path d="'+path+'" fill="none" stroke="#1976d2" stroke-width="4"/>'+line(a,b,'#536779','7 5')+line(m,p,'#bc6512');
+for(const [q,name,dx,dy] of [[a,'A',-15,5],[b,'B',15,5],[m,'M',-12,sens===1?22:-12]])out+='<circle cx="'+q[0]+'" cy="'+q[1]+'" r="3.5" fill="#243746"/>'+label(q,name,dx,dy);
+const k=8;out+='<path d="M '+(m[0]+k)+' '+m[1]+' v '+(-sens*k)+' h '+(-k)+'" fill="none" stroke="#bc6512"/>';
+out+=label([m[0],(m[1]+p[1])/2],'f = '+fmt(f)+' cm',75,4,'#a75208');
+out+=label([250,282],'Corde C = '+fmt(c)+' cm',0,0,'#536779');document.getElementById('drawing').innerHTML=out;}
+const originalInstructions=document.getElementById('instructions').innerHTML;
+const originalLegend=document.getElementById('legend').innerHTML;
+function convexMeasurements(c,d,m){if(!Number.isFinite(d)||!Number.isFinite(m)||d<=0||m<0||m>=d)throw Error('La distance aux extrémités doit être positive et celle au milieu doit être comprise entre 0 et cette distance (exclue).');const f=d-m;if(f>c/2)throw Error('Cette méthode devant le mur est limitée aux arcs de 180° maximum : vérifiez les mesures ou choisissez des points plus rapprochés.');return {f,...compute(c,f)};}
+function drawConvex(c,d,m,theta){
+const f=d-m,ratio=f/c,rr=1/(8*ratio)+ratio/2;
+const pts=[];for(let i=0;i<=160;i++){const t=-theta/2+theta*i/160;pts.push([rr*Math.sin(t),d/c-ratio+2*rr*Math.sin(t/2)**2]);}pts[0]=[-.5,d/c];pts[80]=[0,m/c];pts[160]=[.5,d/c];
+const scale=Math.min(340,165/(d/c)),ox=250,base=235;
+const xy=(x,y)=>[ox+x*scale,base-y*scale];
+const line=(a,b,color,dash='')=>'<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'" stroke="'+color+'" stroke-width="2" stroke-dasharray="'+dash+'"/>';
+const text=(x,y,t,color='#243746')=>'<text x="'+x+'" y="'+y+'" fill="'+color+'" font-size="14" text-anchor="middle" font-family="Arial">'+t+'</text>';
+const a=xy(-.5,d/c),b=xy(.5,d/c),pa=xy(-.5,0),pb=xy(.5,0),mid=xy(0,m/c),top=xy(0,d/c);
+let h='<path d="'+pts.map((p,i)=>(i?'L':'M')+xy(...p).join(',')).join(' ')+'" fill="none" stroke="#1976d2" stroke-width="4"/>';
+h+=line([pa[0]-20,base],[pb[0]+20,base],'#18834b')+line(a,b,'#80909c','5 5')+line(pa,a,'#18834b')+line(pb,b,'#18834b')+line(xy(0,0),mid,'#18834b')+line(mid,top,'#bc6512','4 3');
+h+=text(a[0]-12,a[1]-10,'A')+text(b[0]+12,b[1]-10,'B')+text(pa[0]-28,(base+a[1])/2,fmt(d)) +text(pb[0]+28,(base+b[1])/2,fmt(d));
+h+=text(295,base-5,'Milieu : '+fmt(m)+' cm','#18834b')+text(250,Math.max(35,top[1]-20),'Flèche = '+fmt(d)+' − '+fmt(m)+' = '+fmt(f)+' cm','#a75208');
+h+=text(250,263,'Référence accessible devant le mur','#18834b')+text(250,289,'Écartement des projections : '+fmt(c)+' cm');
+document.getElementById('drawing').innerHTML=h;
+}
+function changeMode(){const convex=document.getElementById('mode').value==='convex';document.getElementById('directFields').hidden=convex;document.getElementById('convexFields').hidden=!convex;document.getElementById('orientation').hidden=convex;document.querySelector('label[for="corde"]').innerHTML=convex?'Écartement des projections de A et B <b>(en cm)</b>':'Longueur de la corde AB <b>(en cm)</b>';document.getElementById('corde').nextElementSibling.textContent=convex?'Distance mesurée le long de la ligne de référence, entre les deux pieds des perpendiculaires.':'Distance droite entre les deux points choisis.';document.getElementById('instructions').innerHTML=convex?'<b>Mur bombé vers vous :</b><ol><li>Placez une règle ou une ligne laser droite devant le bombé, entièrement du côté accessible.</li><li>Choisissez A et B sur le mur à <b>la même distance de cette référence</b>.</li><li>Mesurez l’écartement des projections de A et B sur la référence.</li><li>Au milieu exact de cet écartement, mesurez de la référence jusqu’au mur.</li></ol><b>Toutes les distances au mur se mesurent perpendiculairement à la référence et à la même hauteur.</b><p>Flèche = distance aux extrémités − distance au milieu. Aucun accès derrière le mur n’est nécessaire.</p>':originalInstructions;document.getElementById('legend').innerHTML=convex?'Bleu : mur arrondi · Vert : référence et distances accessibles.<br>Gris pointillé : corde virtuelle, à l’intérieur du mur. Orange : flèche calculée.<br>Vue de dessus, proportions respectées ; repères agrandis.':originalLegend;update();}
+function update(e){if(e)e.preventDefault();const result=document.getElementById('result');try{const c=parseMeasure(document.getElementById('corde').value),isConvex=document.getElementById('mode').value==='convex',d=parseMeasure(document.getElementById('extremites').value),m=parseMeasure(document.getElementById('milieu').value),f=isConvex?d-m:parseMeasure(document.getElementById('fleche').value),v=isConvex?convexMeasurements(c,d,m):compute(c,f);result.className='result';result.innerHTML='<b>Rayon du mur</b><div class="main">'+fmt(v.r)+' cm</div><div>soit '+fmt(v.r/100,3)+' m</div><dl><div><dt>Flèche utilisée</dt><dd>'+fmt(f)+' cm</dd></div><div><dt>Longueur de l’arc AB</dt><dd>'+fmt(v.length)+' cm</dd></div><div><dt>Angle de l’arc au centre</dt><dd>'+fmt(v.theta*180/Math.PI)+'°</dd></div></dl>'+(f>c/2?'<p><b>À vérifier :</b> ces mesures décrivent un arc supérieur à un demi-cercle.</p>':'')+(f/c<.02?'<p><b>Mesure sensible :</b> la flèche est très faible par rapport à la corde. Vérifiez soigneusement sa mesure.</p>':'');if(isConvex)drawConvex(c,d,m,v.theta);else draw(c,f,v.theta,Number(document.getElementById('sens').value));}catch(err){result.className='result error';result.textContent=err.message;document.getElementById('drawing').replaceChildren();}}
+document.getElementById('form').addEventListener('submit',update);document.getElementById('sens').addEventListener('change',update);document.getElementById('mode').addEventListener('change',changeMode);for(const id of ['corde','fleche','extremites','milieu'])document.getElementById(id).addEventListener('input',()=>{document.getElementById('result').className='result';document.getElementById('result').textContent='Mesures modifiées : cliquez sur « Calculer le rayon ».';document.getElementById('drawing').replaceChildren();});update();
+</script></body></html>
